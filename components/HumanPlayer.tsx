@@ -1,3 +1,4 @@
+/// <reference types="@react-three/fiber" />
 import React, { useRef, useEffect } from 'react';
 import { Group, Mesh } from 'three';
 import { WallConfig } from './LevelData';

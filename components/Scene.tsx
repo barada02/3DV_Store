@@ -1,3 +1,4 @@
+/// <reference types="@react-three/fiber" />
 import React, { useRef } from 'react';
 import { Group } from 'three';
 import { MeshReflectorMaterial, Edges } from '@react-three/drei';
@@ -10,47 +11,52 @@ interface SceneProps {
 }
 
 export const Scene: React.FC<SceneProps> = ({ aiActive }) => {
-  // We need a reference to the human player to pass to the AI
   const humanPlayerRef = useRef<Group>(null);
-  // We also need a reference to the AI player to pass to the Human (for collision)
   const aiPlayerRef = useRef<Group>(null);
 
   return (
     <>
-      <color attach="background" args={['#111']} />
+      <color attach="background" args={['#050505']} />
       
-      <ambientLight intensity={0.5} />
+      {/* Indoor Lighting - Warmer and softer */}
+      <ambientLight intensity={0.7} color="#fff1e0" />
       
+      {/* Main Shadows */}
       <directionalLight 
-        position={[10, 20, 10]} 
-        intensity={1.5} 
+        position={[15, 30, 10]} 
+        intensity={1.0} 
+        color="#ffffff"
         castShadow 
         shadow-mapSize={[2048, 2048]}
       >
-        <orthographicCamera attach="shadow-camera" args={[-25, 25, 25, -25]} />
+        <orthographicCamera attach="shadow-camera" args={[-30, 30, 30, -30]} />
       </directionalLight>
 
-      {/* Floor */}
+      {/* Fill Light for store vibe */}
+      <pointLight position={[0, 10, 0]} intensity={0.5} color="#dbeafe" distance={30} />
+
+      {/* Floor - Tiled Look */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[100, 100]} />
         <MeshReflectorMaterial
           blur={[300, 100]}
           resolution={1024}
           mixBlur={1}
-          mixStrength={40}
-          roughness={1}
-          depthScale={1.2}
+          mixStrength={15} // Less reflective than the arena
+          roughness={0.7} // More matte (tile/wood)
+          depthScale={1}
           minDepthThreshold={0.4}
           maxDepthThreshold={1.4}
-          color="#151515"
-          metalness={0.5}
-          mirror={0.5} 
+          color="#334155" // Slate floor
+          metalness={0.2}
+          mirror={0.2} 
         />
       </mesh>
+      
+      {/* Subtle Grid for scale reference */}
+      <gridHelper args={[100, 50, 0x475569, 0x1e293b]} position={[0, 0.01, 0]} />
 
-      <gridHelper args={[100, 100, 0x333333, 0x111111]} position={[0, 0.01, 0]} />
-
-      {/* Walls */}
+      {/* Render Level Data */}
       {walls.map((wall, index) => (
         <mesh 
           key={index} 
@@ -59,36 +65,42 @@ export const Scene: React.FC<SceneProps> = ({ aiActive }) => {
           receiveShadow
         >
           <boxGeometry args={wall.size} />
-          <meshStandardMaterial color={wall.color} roughness={0.2} metalness={0.1} />
+          <meshStandardMaterial 
+            color={wall.color} 
+            roughness={wall.type === 'prop' ? 0.5 : 0.9} 
+            metalness={wall.type === 'prop' ? 0.3 : 0.1} 
+          />
+          {/* Add edges to props to make them look distinct */}
           <Edges 
-            color="white" 
+            color={wall.type === 'prop' ? '#9ca3af' : '#d1d5db'} 
             threshold={15} 
-            scale={1.01} 
+            scale={1.001} 
           />
         </mesh>
       ))}
 
-      {/* Human Player (WASD) */}
+      {/* Human Player (Customer) */}
       <HumanPlayer 
         walls={walls} 
-        position={[-6, 1, 6]} 
-        color="#00e5ff" 
+        position={[0, 0, 12]} // Start near entrance
+        color="#0ea5e9" 
         forwardRef={humanPlayerRef}
         otherPlayers={[aiPlayerRef]}
       />
 
-      {/* AI Player (Chaser) */}
+      {/* AI Player (Security Bot / Store Clerk) */}
       <AIPlayer 
         walls={walls} 
-        position={[6, 1, -6]} 
-        color="#ff3366" 
+        position={[10, 0, -10]} // Start in back corner
+        color="#ef4444" 
         targetRef={humanPlayerRef}
         active={aiActive}
         forwardRef={aiPlayerRef}
         otherPlayers={[humanPlayerRef]}
       />
       
-      <fog attach="fog" args={['#111', 10, 50]} />
+      {/* Distance Fog - darker to hide the void */}
+      <fog attach="fog" args={['#050505', 15, 60]} />
     </>
   );
 };

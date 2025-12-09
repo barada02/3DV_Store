@@ -1,3 +1,4 @@
+
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3, Mesh, Box3, Group, Quaternion, Euler } from 'three';
@@ -5,7 +6,8 @@ import { WallConfig } from '../components/LevelData';
 
 const SPEED = 8;
 const SPRINT_MULTIPLIER = 1.5;
-const PLAYER_SIZE = 0.9;
+// Increased collision box size to match the visual scale (0.6) better and prevent clipping
+const PLAYER_SIZE = 0.8; 
 
 export interface MoveInput {
   x: number; // -1 to 1 (Left/Right)
@@ -45,25 +47,26 @@ export const useCharacterPhysics = (
     const distance = currentSpeed * delta;
 
     // Calculate intended movement
-    // Note: inputX controls Left(-)/Right(+)
-    // Note: inputZ controls Forward(-)/Backward(+)
     let dx = inputX * distance; 
     let dz = inputZ * distance; 
 
     // Idle Animation if no movement
     if (dx === 0 && dz === 0) {
-        meshRef.current.position.y = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-        // When idle, we stop updating rotation so it stays facing the last direction
+        // Subtle breathing animation
+        meshRef.current.position.y = Math.max(0, Math.sin(state.clock.elapsedTime * 2) * 0.02);
         return;
     }
 
     const currentPos = meshRef.current.position;
     
-    // Helper to check collision with both static walls and dynamic obstacles
+    // Helper to check collision
     const checkCollision = (tempPos: Vector3) => {
-        playerBox.setFromCenterAndSize(tempPos, new Vector3(PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE));
+        // Create player bounding box at temporary position
+        // We lift the box slightly (y+1) so it catches walls but doesn't drag on floor
+        const center = tempPos.clone().add(new Vector3(0, 1, 0));
+        playerBox.setFromCenterAndSize(center, new Vector3(PLAYER_SIZE, 2, PLAYER_SIZE));
         
-        // 1. Static Walls
+        // 1. Static Walls & Props
         for (const wall of walls) {
             wallBox.setFromCenterAndSize(new Vector3(...wall.position), new Vector3(...wall.size));
             if (playerBox.intersectsBox(wallBox)) return true;
@@ -72,8 +75,35 @@ export const useCharacterPhysics = (
         // 2. Dynamic Obstacles (Other Players)
         for (const obstacle of dynamicObstacles) {
             if (obstacle.current && obstacle.current !== meshRef.current) {
-                wallBox.setFromCenterAndSize(obstacle.current.position, new Vector3(PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE));
-                 if (playerBox.intersectsBox(wallBox)) return true;
+                const obsPos = obstacle.current.position;
+                // Assume obstacles are roughly same size
+                const obsCenter = obsPos.clone().add(new Vector3(0, 1, 0));
+                
+                wallBox.setFromCenterAndSize(obsCenter, new Vector3(PLAYER_SIZE, 2, PLAYER_SIZE));
+                
+                if (playerBox.intersectsBox(wallBox)) {
+                    // STUCK FIX: 
+                    // If we are intersecting, standard logic would just return 'true' and block ALL movement.
+                    // This causes players to stick together if they accidentally overlap.
+                    // FIX: We calculate if the intended move increases the distance between players.
+                    // If moving AWAY, we allow it.
+                    
+                    const dx = tempPos.x - obsPos.x;
+                    const dz = tempPos.z - obsPos.z;
+                    const newDistSq = dx * dx + dz * dz;
+
+                    const oldDx = currentPos.x - obsPos.x;
+                    const oldDz = currentPos.z - obsPos.z;
+                    const oldDistSq = oldDx * oldDx + oldDz * oldDz;
+
+                    // If new distance is greater than old distance, we are separating.
+                    // Add a tiny epsilon to handle floating point precision
+                    if (newDistSq > oldDistSq + 0.0001) {
+                        continue; // Ignore this collision, allow movement
+                    }
+
+                    return true; // Moving closer or staying put? Block it.
+                }
             }
         }
         
@@ -96,19 +126,13 @@ export const useCharacterPhysics = (
       }
     }
 
-    // Movement Animation (Bobbing)
-    meshRef.current.position.y = 1 + Math.sin(state.clock.elapsedTime * 15) * 0.05;
+    // Walking Bobbing Animation
+    meshRef.current.position.y = Math.abs(Math.sin(state.clock.elapsedTime * 15) * 0.08);
     
     // Smooth Rotation Logic
-    // 1. Calculate the target angle based on movement vector (dx, dz)
     const angle = Math.atan2(dx, dz);
-    
-    // 2. Create a rotation quaternion from that angle (Around Y axis)
     rotationEuler.set(0, angle, 0);
     targetQuaternion.setFromEuler(rotationEuler);
-    
-    // 3. Smoothly interpolate (Slerp) current rotation to target rotation
-    // 0.15 is the "smoothness" factor. Lower = slower turn, Higher = snappier.
     meshRef.current.quaternion.slerp(targetQuaternion, 0.15);
   });
 };

@@ -183,3 +183,41 @@ We will update `LevelData.ts` to separate "Structure" from "Props".
 ### D. Visuals
 *   **Floor**: Change to a Tiled or Wood texture look (using grid or colors).
 *   **Lighting**: Warmer, more inviting lighting rather than the harsh "Arena" light.
+
+## 10. Store Detailing Strategy (New)
+
+To address the "Empty Tables" issue, we will procedurally generate low-poly merchandise on top of any wall defined as a `prop`.
+
+### A. The "Tech Product" Primitives
+We will use React Three Fiber primitives to create simplified icons of products.
+
+1.  **The Laptop**:
+    *   Base: Thin Box `[0.6, 0.05, 0.4]`
+    *   Screen: Thin Box `[0.6, 0.4, 0.05]` rotated 100 degrees.
+    *   Screen Glow: Emissive material on the inner face.
+    ```text
+         /|
+        / |  <-- Screen
+       /__|
+      |____| <-- Base
+    ```
+
+2.  **The Phone**:
+    *   Very thin box `[0.15, 0.02, 0.3]`
+    *   Black glossy material.
+
+3.  **The Box (Stock)**:
+    *   Simple cubes `[0.5, 0.5, 0.5]` stacked.
+
+### B. Implementation Logic (`StoreProps.tsx`)
+We will create a new component `<StoreProps walls={walls} />`.
+
+**Algorithm:**
+1.  Iterate through the `walls` array.
+2.  Check `if (wall.type === 'prop')`.
+3.  If it is a prop (Table):
+    *   Calculate the "Surface Y" (`wall.position.y + wall.size.y / 2`).
+    *   Spawn 2-3 random items on the surface.
+    *   Apply random slight rotation (Y-axis) to items so they don't look perfectly grid-aligned.
+4.  This adds visual density without adding new physics colliders (since the table itself is the collider).
+
