@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Loader } from '@react-three/drei';
@@ -10,11 +11,11 @@ const App: React.FC = () => {
       {/* UI Overlay */}
       <div className="absolute top-0 left-0 p-6 z-10 pointer-events-none text-white w-full flex justify-between items-start select-none">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tighter mb-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
-            NEON RUNNER
+          <h1 className="text-4xl font-extrabold tracking-tighter mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+            3D PLAYGROUND
           </h1>
           <p className="text-gray-400 text-sm max-w-md">
-            Navigate the void using your keyboard. Experience the reflective floor and dynamic lighting.
+            Experiment with movement and collision.
           </p>
         </div>
         
@@ -34,31 +35,24 @@ const App: React.FC = () => {
                 </span>
                 <span className="text-xs font-mono uppercase text-gray-400">Sprint</span>
             </div>
-            <div className="flex items-center gap-3">
-                <span className="flex">
-                    <Kbd>LMB + Drag</Kbd>
-                </span>
-                <span className="text-xs font-mono uppercase text-gray-400">Rotate Cam</span>
-            </div>
         </div>
       </div>
 
       {/* 3D Canvas */}
       <Suspense fallback={null}>
-        <Canvas shadows camera={{ position: [0, 8, 12], fov: 45 }}>
+        <Canvas shadows camera={{ position: [0, 20, 20], fov: 45 }}>
           <Scene />
           <OrbitControls 
             enablePan={false}
             enableZoom={true}
-            minDistance={5}
-            maxDistance={25}
-            maxPolarAngle={Math.PI / 2 - 0.1} // Don't go below the floor
-            autoRotate={false}
+            minDistance={10}
+            maxDistance={50}
+            maxPolarAngle={Math.PI / 2 - 0.1}
+            target={[0, 0, 0]}
           />
         </Canvas>
       </Suspense>
       
-      {/* Pre-made Loader from Drei */}
       <Loader containerStyles={{ background: '#050505' }} />
     </div>
   );
