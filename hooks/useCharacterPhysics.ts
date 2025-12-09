@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Vector3, Mesh, Box3, Group } from 'three';
+import { Vector3, Mesh, Box3, Group, Quaternion, Euler } from 'three';
 import { WallConfig } from '../components/LevelData';
 
 const SPEED = 8;
@@ -23,6 +23,10 @@ export const useCharacterPhysics = (
   const playerBox = useRef(new Box3()).current;
   const wallBox = useRef(new Box3()).current;
   const tempVector = useRef(new Vector3()).current;
+  
+  // Rotation Maths
+  const targetQuaternion = useRef(new Quaternion()).current;
+  const rotationEuler = useRef(new Euler(0, 0, 0)).current;
 
   // Set initial position
   useMemo(() => {
@@ -48,8 +52,7 @@ export const useCharacterPhysics = (
     // Idle Animation if no movement
     if (dx === 0 && dz === 0) {
         meshRef.current.position.y = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
-        meshRef.current.rotation.z *= 0.9;
-        meshRef.current.rotation.x *= 0.9;
+        // When idle, we stop updating rotation so it stays facing the last direction
         return;
     }
 
@@ -89,9 +92,19 @@ export const useCharacterPhysics = (
       if (!collisionZ) meshRef.current.position.z += dz;
     }
 
-    // Movement Animation (Bobbing and Tilting)
+    // Movement Animation (Bobbing)
     meshRef.current.position.y = 1 + Math.sin(state.clock.elapsedTime * 15) * 0.05;
-    meshRef.current.rotation.z = -dx * 0.1;
-    meshRef.current.rotation.x = dz * 0.1;
+    
+    // Smooth Rotation Logic
+    // 1. Calculate the target angle based on movement vector (dx, dz)
+    const angle = Math.atan2(dx, dz);
+    
+    // 2. Create a rotation quaternion from that angle (Around Y axis)
+    rotationEuler.set(0, angle, 0);
+    targetQuaternion.setFromEuler(rotationEuler);
+    
+    // 3. Smoothly interpolate (Slerp) current rotation to target rotation
+    // 0.15 is the "smoothness" factor. Lower = slower turn, Higher = snappier.
+    meshRef.current.quaternion.slerp(targetQuaternion, 0.15);
   });
 };

@@ -47,32 +47,33 @@ This is the core engine used by both entities.
 
 **Logic Loop (`useFrame`)**:
 1.  **Delta Time**: Multiplies speed by `delta` to ensure movement is framerate independent.
-2.  **X-Axis Move**: Calculates theoretical next X position. Checks collision. If clear, commit move.
-3.  **Z-Axis Move**: Calculates theoretical next Z position. Checks collision. If clear, commit move.
-    *   *Note*: Separating X and Z checks allows "Sliding". If you run diagonally into a wall, you don't stop; you slide along the open axis.
-4.  **Animation**: Procedural "bobbing" (Sine wave on Y-axis) and "tilting" (Rotation based on velocity) to simulate walking/running.
+2.  **Collision Detection**: Checks `dx` and `dz` separately against wall bounding boxes to allow "sliding" along walls.
+3.  **Rotation**: Uses `Math.atan2(dx, dz)` to calculate the movement angle and `Quaternion.slerp` to smoothly rotate the character to face the direction of travel.
+4.  **Animation**: Procedural "bobbing" (Sine wave on Y-axis) and limb rotation (via `CharacterModel`) simulate walking/running.
 
 ### `useKeyboard.ts`
 *   Attaches event listeners to `window`.
 *   Returns a reactive state object representing currently pressed keys.
 
-## 📐 Math & Logic
+## 🧠 AI Logic: Game AI vs Machine Learning
 
-### Collision Detection (AABB)
-We use **Axis-Aligned Bounding Boxes**.
-*   We maintain a reusable `THREE.Box3` instance.
-*   Every frame, we expand the player's position into this box.
-*   We check `box.intersectsBox(wallBox)` for every wall in the level.
-*   *Optimization*: Objects are pooled (created once in `useRef`) to prevent Garbage Collection stutters.
+It is important to distinguish the type of AI used in this application.
 
-### AI Navigation & Nature of Intelligence
-The current AI is an example of **"Game AI" (Symbolic AI)**, not "Machine Learning".
+**This is "Game AI" (Symbolic AI / Hardcoded Logic), NOT Machine Learning.**
 
-*   **Is it Learning?** No. It does not use Neural Networks or Reinforcement Learning. It does not "remember" past mistakes in a permanent database.
-*   **How it decides?** It uses a **Finite State Machine (FSM)** combined with **Heuristic Rules**.
-    *   *Rule 1 (Chase)*: "If I am not stuck, calculate the vector to the player and move there."
-    *   *Rule 2 (Stuck)*: "If I am trying to move but my position isn't changing (Velocity ~ 0), I am hitting a wall. Switch to Random Move mode for 1 second."
-*   **Why this approach?** For real-time games, FSMs are predictable, performant (CPU cheap), and easy to debug compared to non-deterministic Neural Networks.
+### How it works:
+The AI operates on a **Deterministic Finite State Machine (FSM)**. It does not "think" or "learn" in the neural network sense. It follows a strict set of programmer-defined rules:
+
+1.  **Perception**: The AI accesses the exact coordinate of the player (`targetRef.current.position`). In a real scenario, this would be "Raycasting" or "Vision Cones", but here we cheat slightly for performance by giving it perfect knowledge of the target's location.
+2.  **Decision**:
+    *   *Condition A*: Am I moving slower than expected? -> **Action**: Trigger "Unstick" routine.
+    *   *Condition B*: Is the path clear? -> **Action**: Move straight towards target.
+3.  **Action**: The AI updates its input vector `{x, z}` which drives the physics engine.
+
+### Why not Machine Learning?
+*   **Performance**: Logic gates (`if/else`) are effectively free. Neural networks require heavy matrix multiplication.
+*   **Predictability**: In game design, you often want enemies to be predictable so players can master the mechanics. ML agents can sometimes behave erratically or "break" the game in unforeseen ways.
+*   **Setup**: Training a Reinforcement Learning (RL) model takes hours/days. Writing an FSM takes minutes.
 
 ## ⚡ Performance
 
