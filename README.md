@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 3D React Playground
 
-# Run and deploy your AI Studio app
+A high-performance, interactive 3D web application built with React Three Fiber. This project demonstrates third-person character control, physics-based collision detection, and modern web graphics techniques.
 
-This contains everything you need to run your app locally.
+## 🌟 Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1liYu8nfWymhcSX_H4xZcPxQ_aSrfE47b
+*   **Responsive 3D Controls**: Smooth character movement using WASD or Arrow keys.
+*   **Collision Detection**: Robust, axis-independent collision logic that prevents clipping and allows sliding along walls.
+*   **Dynamic Visuals**:
+    *   Real-time shadows and lighting.
+    *   Reflective flooring with blur effects.
+    *   Reactive player materials (changes color when sprinting).
+*   **Clean UI**: Minimalist overlay built with Tailwind CSS.
 
-## Run Locally
+## 🛠 Tech Stack
 
-**Prerequisites:**  Node.js
+*   **React 19**: Core UI library.
+*   **Three.js**: 3D graphics library.
+*   **React Three Fiber (R3F)**: React renderer for Three.js.
+*   **React Three Drei**: Helper library for R3F (providing `RoundedBox`, `OrbitControls`, `MeshReflectorMaterial`).
+*   **Tailwind CSS**: Styling for the UI overlay.
 
+## 🎮 Controls
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+*   **W / Up Arrow**: Move Forward
+*   **S / Down Arrow**: Move Backward
+*   **A / Left Arrow**: Move Left
+*   **D / Right Arrow**: Move Right
+*   **Shift**: Sprint (Move faster)
+*   **Mouse Left Click + Drag**: Rotate Camera
+*   **Mouse Scroll**: Zoom In/Out
