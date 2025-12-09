@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MeshReflectorMaterial, Edges } from '@react-three/drei';
 import { Player } from './Player';
@@ -38,7 +37,6 @@ export const Scene: React.FC = () => {
         />
       </mesh>
 
-      {/* Grid for aesthetics */}
       <gridHelper args={[100, 100, 0x333333, 0x111111]} position={[0, 0.01, 0]} />
 
       {/* Walls */}
@@ -51,17 +49,29 @@ export const Scene: React.FC = () => {
         >
           <boxGeometry args={wall.size} />
           <meshStandardMaterial color={wall.color} roughness={0.2} metalness={0.1} />
-          {/* Aesthetic Edges */}
           <Edges 
             color="white" 
             threshold={15} 
-            scale={1.01} // slightly larger to prevent z-fighting
+            scale={1.01} 
           />
         </mesh>
       ))}
 
-      {/* Player with Wall Collision Data */}
-      <Player walls={walls} />
+      {/* Player 1 - Cyan (WASD) */}
+      <Player 
+        walls={walls} 
+        position={[-3, 1, 0]} 
+        color="#00e5ff" 
+        controlScheme="wasd" 
+      />
+
+      {/* Player 2 - Orange (Arrows) */}
+      <Player 
+        walls={walls} 
+        position={[3, 1, 0]} 
+        color="#ff9100" 
+        controlScheme="arrows" 
+      />
       
       <fog attach="fog" args={['#111', 10, 50]} />
     </>
