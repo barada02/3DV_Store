@@ -11,17 +11,17 @@ const App: React.FC = () => {
       <div className="absolute top-0 left-0 p-6 z-10 pointer-events-none text-white w-full flex justify-between items-start select-none">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tighter mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-            3D PLAYGROUND
+            AI CHASE
           </h1>
           <p className="text-gray-400 text-sm max-w-md">
-            Local multiplayer. Avoid the walls.
+            Outrun the AI Agent. It learns from collision context.
           </p>
         </div>
         
         <div className="flex gap-4">
             {/* Player 1 Controls */}
             <div className="bg-cyan-900/30 backdrop-blur-md border border-cyan-500/30 p-4 rounded-xl flex flex-col gap-2 shadow-2xl">
-                <div className="text-cyan-400 text-xs font-bold uppercase tracking-widest mb-1">Player 1</div>
+                <div className="text-cyan-400 text-xs font-bold uppercase tracking-widest mb-1">Human (You)</div>
                 <div className="flex items-center gap-3">
                     <span className="flex gap-1">
                         <Kbd>W</Kbd><Kbd>A</Kbd><Kbd>S</Kbd><Kbd>D</Kbd>
@@ -30,26 +30,25 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="flex">
-                        <Kbd>L-Shift</Kbd>
+                        <Kbd>Shift</Kbd>
                     </span>
                     <span className="text-xs font-mono uppercase text-gray-400">Sprint</span>
                 </div>
             </div>
 
-            {/* Player 2 Controls */}
-            <div className="bg-orange-900/30 backdrop-blur-md border border-orange-500/30 p-4 rounded-xl flex flex-col gap-2 shadow-2xl">
-                <div className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-1">Player 2</div>
+            {/* AI Info */}
+            <div className="bg-red-900/30 backdrop-blur-md border border-red-500/30 p-4 rounded-xl flex flex-col gap-2 shadow-2xl">
+                <div className="text-red-400 text-xs font-bold uppercase tracking-widest mb-1">AI Agent</div>
                 <div className="flex items-center gap-3">
-                    <span className="flex gap-1">
-                        <Kbd>↑</Kbd><Kbd>←</Kbd><Kbd>↓</Kbd><Kbd>→</Kbd>
-                    </span>
-                    <span className="text-xs font-mono uppercase text-gray-400">Move</span>
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span className="text-xs font-mono uppercase text-gray-300">Autonomous</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="flex">
-                        <Kbd>R-Shift</Kbd>
-                    </span>
-                    <span className="text-xs font-mono uppercase text-gray-400">Sprint</span>
+                <div className="text-[10px] text-gray-500 leading-tight max-w-[120px]">
+                    State Machine:
+                    <br/>
+                    • Chase Target
+                    <br/>
+                    • Wall Unstuck
                 </div>
             </div>
         </div>
@@ -57,7 +56,7 @@ const App: React.FC = () => {
 
       {/* 3D Canvas */}
       <Suspense fallback={null}>
-        <Canvas shadows camera={{ position: [0, 20, 25], fov: 40 }}>
+        <Canvas shadows camera={{ position: [0, 25, 25], fov: 35 }}>
           <Scene />
           <OrbitControls 
             enablePan={false}

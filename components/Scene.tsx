@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { Mesh } from 'three';
 import { MeshReflectorMaterial, Edges } from '@react-three/drei';
-import { Player } from './Player';
+import { HumanPlayer } from './HumanPlayer';
+import { AIPlayer } from './AIPlayer';
 import { walls } from './LevelData';
 
 export const Scene: React.FC = () => {
+  // We need a reference to the human player to pass to the AI
+  const humanPlayerRef = useRef<Mesh>(null);
+
   return (
     <>
       <color attach="background" args={['#111']} />
@@ -57,20 +62,20 @@ export const Scene: React.FC = () => {
         </mesh>
       ))}
 
-      {/* Player 1 - Cyan (WASD) */}
-      <Player 
+      {/* Human Player (WASD) */}
+      <HumanPlayer 
         walls={walls} 
-        position={[-3, 1, 0]} 
+        position={[-6, 1, 6]} 
         color="#00e5ff" 
-        controlScheme="wasd" 
+        forwardRef={humanPlayerRef}
       />
 
-      {/* Player 2 - Orange (Arrows) */}
-      <Player 
+      {/* AI Player (Chaser) */}
+      <AIPlayer 
         walls={walls} 
-        position={[3, 1, 0]} 
-        color="#ff9100" 
-        controlScheme="arrows" 
+        position={[6, 1, -6]} 
+        color="#ff3366" 
+        targetRef={humanPlayerRef}
       />
       
       <fog attach="fog" args={['#111', 10, 50]} />
