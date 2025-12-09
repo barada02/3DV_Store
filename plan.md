@@ -87,3 +87,49 @@ graph TD
 2.  **Create AI Hook**: Implement `useAIBehavior` with basic "Move towards target" logic.
 3.  **Add "Vision"**: Implement crude raycasting (checking distance to walls mathematically) to prevent the AI from running into walls.
 4.  **Integration**: Replace the second `<Player />` in `Scene.tsx` with the AI-controlled version.
+
+## 7. Character Model Upgrade Plan (New)
+
+To replace the abstract cubes with recognizable characters without relying on external assets (which can be flaky), we will procedurally generate a **Voxel/Robot Style Character** using Three.js primitives.
+
+### A. The "Voxel Bot" Design
+The character will be a composite React component `CharacterModel.tsx` composed of grouped meshes:
+
+*   **Head**: `boxGeometry` with a glowing "visor" for eyes.
+*   **Torso**: `boxGeometry` slightly tapered (Trapezoid feel).
+*   **Limbs**: Separate meshes for Left Arm, Right Arm, Left Leg, Right Leg.
+*   **Joints**: Pivot points at the shoulders and hips to allow rotation.
+
+### B. Procedural Animation
+Instead of static meshes, we will implement a "Walking Cycle" directly in the component loop.
+
+**Logic:**
+Inside `useFrame`:
+1.  **Check Velocity**: If the character is moving (`velocity > 0.1`):
+2.  **Sine Wave Calculation**: `Math.sin(time * speed)`
+3.  **Apply Rotation**:
+    *   Left Arm: `rotation.x = sin(t)`
+    *   Right Arm: `rotation.x = -sin(t)` (Opposite phase)
+    *   Left Leg: `rotation.x = -sin(t)`
+    *   Right Leg: `rotation.x = sin(t)`
+
+This creates a natural "marching" or running look.
+
+### C. Implementation Steps for Upgrade
+1.  **Create `components/CharacterModel.tsx`**:
+    *   Accepts props: `color`, `isMoving` (boolean).
+    *   Returns a `<group>` containing the body parts.
+2.  **Update `HumanPlayer.tsx`**:
+    *   Replace `<RoundedBox>` with `<CharacterModel>`.
+    *   Pass `color="#00e5ff"`.
+    *   Pass movement state (derived from keyboard input).
+3.  **Update `AIPlayer.tsx`**:
+    *   Replace `<RoundedBox>` with `<CharacterModel>`.
+    *   Pass `color="#ff3366"`.
+    *   Pass movement state (derived from AI velocity).
+
+### D. Visual Reference (Mental Model)
+Think of a simplified **Minecraft** or **Crossy Road** style character.
+*   Blocky aesthetics.
+*   Clear distinction between front/back (Face visor).
+*   Exaggerated running animation.
