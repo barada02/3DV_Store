@@ -1,9 +1,16 @@
 import React, { useRef } from 'react';
 import { Group } from 'three';
 import { MeshReflectorMaterial, Edges } from '@react-three/drei';
+import { ThreeElements } from '@react-three/fiber';
 import { HumanPlayer } from './HumanPlayer';
 import { AIPlayer } from './AIPlayer';
 import { walls } from './LevelData';
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {}
+  }
+}
 
 export const Scene: React.FC = () => {
   // We need a reference to the human player to pass to the AI

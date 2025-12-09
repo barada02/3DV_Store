@@ -1,3 +1,4 @@
+
 # Technical Documentation
 
 This document provides an in-depth look at the architecture, logic, and component structure of the 3D AI Chase Playground.
@@ -64,10 +65,14 @@ We use **Axis-Aligned Bounding Boxes**.
 *   We check `box.intersectsBox(wallBox)` for every wall in the level.
 *   *Optimization*: Objects are pooled (created once in `useRef`) to prevent Garbage Collection stutters.
 
-### AI Navigation
-Currently uses a direct **Seek Behavior** with a **Timeout Heuristic** for obstacle avoidance.
-*   **Seek**: `Direction = Target - Me`.
-*   **Heuristic**: "If I want to move but I am not moving, I am blocked. Do something random."
+### AI Navigation & Nature of Intelligence
+The current AI is an example of **"Game AI" (Symbolic AI)**, not "Machine Learning".
+
+*   **Is it Learning?** No. It does not use Neural Networks or Reinforcement Learning. It does not "remember" past mistakes in a permanent database.
+*   **How it decides?** It uses a **Finite State Machine (FSM)** combined with **Heuristic Rules**.
+    *   *Rule 1 (Chase)*: "If I am not stuck, calculate the vector to the player and move there."
+    *   *Rule 2 (Stuck)*: "If I am trying to move but my position isn't changing (Velocity ~ 0), I am hitting a wall. Switch to Random Move mode for 1 second."
+*   **Why this approach?** For real-time games, FSMs are predictable, performant (CPU cheap), and easy to debug compared to non-deterministic Neural Networks.
 
 ## ⚡ Performance
 

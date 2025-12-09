@@ -1,9 +1,16 @@
 import React, { useRef, useEffect } from 'react';
 import { Group } from 'three';
+import { ThreeElements } from '@react-three/fiber';
 import { WallConfig } from './LevelData';
 import useKeyboard from '../hooks/useKeyboard';
 import { useCharacterPhysics, MoveInput } from '../hooks/useCharacterPhysics';
 import { CharacterModel } from './CharacterModel';
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {}
+  }
+}
 
 interface HumanPlayerProps {
   walls: WallConfig[];

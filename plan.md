@@ -1,3 +1,4 @@
+
 # AI Agent Implementation Plan
 
 ## 1. Overview
@@ -115,21 +116,21 @@ Inside `useFrame`:
 
 This creates a natural "marching" or running look.
 
-### C. Implementation Steps for Upgrade
-1.  **Create `components/CharacterModel.tsx`**:
-    *   Accepts props: `color`, `isMoving` (boolean).
-    *   Returns a `<group>` containing the body parts.
-2.  **Update `HumanPlayer.tsx`**:
-    *   Replace `<RoundedBox>` with `<CharacterModel>`.
-    *   Pass `color="#00e5ff"`.
-    *   Pass movement state (derived from keyboard input).
-3.  **Update `AIPlayer.tsx`**:
-    *   Replace `<RoundedBox>` with `<CharacterModel>`.
-    *   Pass `color="#ff3366"`.
-    *   Pass movement state (derived from AI velocity).
+## 8. Character Rotation & Orientation (New)
 
-### D. Visual Reference (Mental Model)
-Think of a simplified **Minecraft** or **Crossy Road** style character.
-*   Blocky aesthetics.
-*   Clear distinction between front/back (Face visor).
-*   Exaggerated running animation.
+Currently, characters slide in X/Z directions while facing a fixed direction. To improve realism, they must rotate to face their movement vector.
+
+### A. Math
+We will use the `Math.atan2(x, z)` function to calculate the angle of the movement vector.
+*   `targetRotation = Math.atan2(deltaX, deltaZ)`
+
+### B. Smoothing (Lerp)
+Instant snapping looks robotic. We will use **Spherical Linear Interpolation (Slerp)** or basic **Angle Lerp** to rotate the character smoothly over time.
+*   `currentRotation = MathUtils.lerp(currentRotation, targetRotation, 0.1)`
+
+### C. Logic Location
+This logic will be added to `useCharacterPhysics.ts`.
+1.  Check if `dx` or `dz` is non-zero.
+2.  Calculate angle.
+3.  Apply rotation to `meshRef.current.rotation.y`.
+4.  Remove the old "tilt" logic (`rotation.z = -dx * 0.1`) as it conflicts with proper facing.

@@ -1,7 +1,13 @@
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, ThreeElements } from '@react-three/fiber';
 import { Group, MathUtils } from 'three';
 import { MoveInput } from '../hooks/useCharacterPhysics';
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends ThreeElements {}
+  }
+}
 
 interface CharacterModelProps {
   color: string;
