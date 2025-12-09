@@ -22,18 +22,20 @@ Composes the world. It holds the "Truth" of the level:
 *   Instantiates the **Level Data** (Walls).
 *   Creates the `ref` for the Human Player.
 *   Passes that `ref` to the `AIPlayer`, enabling the "Vision" capability.
+*   Passes the `aiActive` prop to control the AI simulation state.
 
 ### 2. `HumanPlayer.tsx`
 *   **Input**: Listens to WASD via `useKeyboard`.
 *   **Logic**: Converts booleans (`isPressed`) into a normalized Vector3 direction.
-*   **Rendering**: Renders a Blue `RoundedBox` with a `MeshStandardMaterial`.
+*   **Rendering**: Renders a procedural `CharacterModel` with a Blue color theme.
 
 ### 3. `AIPlayer.tsx` (The Autonomous Agent)
 *   **Input**: Mathematically derived frame-by-frame.
+*   **Control**: Accepts an `active` prop. If `false`, movement vector is reset to `(0,0)`, stopping the agent.
 *   **State Machine**:
     *   **CHASE**: Calculates direction vector: `(TargetPos - CurrentPos).normalize()`.
     *   **UNSTICK**: If `position` changes by < 0.01 units over 0.5s while trying to move, the AI assumes it is stuck. It switches to this state, picks a random direction, and sprints for 1.0s to clear the obstacle.
-*   **Rendering**: Renders a Red `RoundedBox` and a floating Text label showing current state.
+*   **Rendering**: Renders a Red `CharacterModel` and a floating Text label showing current state (CHASE, UNSTICK, or PAUSED).
 
 ## 🪝 Custom Hooks
 
@@ -66,8 +68,9 @@ The AI operates on a **Deterministic Finite State Machine (FSM)**. It does not "
 
 1.  **Perception**: The AI accesses the exact coordinate of the player (`targetRef.current.position`). In a real scenario, this would be "Raycasting" or "Vision Cones", but here we cheat slightly for performance by giving it perfect knowledge of the target's location.
 2.  **Decision**:
-    *   *Condition A*: Am I moving slower than expected? -> **Action**: Trigger "Unstick" routine.
-    *   *Condition B*: Is the path clear? -> **Action**: Move straight towards target.
+    *   *Condition A*: Am I paused? -> **Action**: Do nothing.
+    *   *Condition B*: Am I moving slower than expected? -> **Action**: Trigger "Unstick" routine.
+    *   *Condition C*: Is the path clear? -> **Action**: Move straight towards target.
 3.  **Action**: The AI updates its input vector `{x, z}` which drives the physics engine.
 
 ### Why not Machine Learning?

@@ -12,9 +12,15 @@ declare global {
   }
 }
 
-export const Scene: React.FC = () => {
+interface SceneProps {
+  aiActive: boolean;
+}
+
+export const Scene: React.FC<SceneProps> = ({ aiActive }) => {
   // We need a reference to the human player to pass to the AI
   const humanPlayerRef = useRef<Group>(null);
+  // We also need a reference to the AI player to pass to the Human (for collision)
+  const aiPlayerRef = useRef<Group>(null);
 
   return (
     <>
@@ -75,6 +81,7 @@ export const Scene: React.FC = () => {
         position={[-6, 1, 6]} 
         color="#00e5ff" 
         forwardRef={humanPlayerRef}
+        otherPlayers={[aiPlayerRef]}
       />
 
       {/* AI Player (Chaser) */}
@@ -83,6 +90,9 @@ export const Scene: React.FC = () => {
         position={[6, 1, -6]} 
         color="#ff3366" 
         targetRef={humanPlayerRef}
+        active={aiActive}
+        forwardRef={aiPlayerRef}
+        otherPlayers={[humanPlayerRef]}
       />
       
       <fog attach="fog" args={['#111', 10, 50]} />

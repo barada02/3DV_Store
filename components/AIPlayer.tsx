@@ -17,12 +17,17 @@ interface AIPlayerProps {
   position: [number, number, number];
   color: string;
   targetRef: React.RefObject<Group | Mesh | null>;
+  active: boolean;
+  forwardRef?: React.RefObject<Group | null>;
+  otherPlayers?: React.RefObject<Group | Mesh | null>[];
 }
 
 type AIState = 'CHASE' | 'UNSTICK';
 
-export const AIPlayer: React.FC<AIPlayerProps> = ({ walls, position, color, targetRef }) => {
-  const meshRef = useRef<Group>(null);
+export const AIPlayer: React.FC<AIPlayerProps> = ({ walls, position, color, targetRef, active, forwardRef, otherPlayers = [] }) => {
+  const internalRef = useRef<Group>(null);
+  const meshRef = forwardRef || internalRef;
+
   const inputRef = useRef<MoveInput>({ x: 0, z: 0, sprint: false });
   
   // State Machine logic vars
@@ -36,6 +41,12 @@ export const AIPlayer: React.FC<AIPlayerProps> = ({ walls, position, color, targ
 
   useFrame((state, delta) => {
     if (!meshRef.current || !targetRef.current) return;
+
+    // If AI is deactivated via UI
+    if (!active) {
+        inputRef.current = { x: 0, z: 0, sprint: false };
+        return;
+    }
 
     // 1. Stuck Detection
     // Check if we haven't moved much in the last 0.5 seconds while trying to move
@@ -98,7 +109,7 @@ export const AIPlayer: React.FC<AIPlayerProps> = ({ walls, position, color, targ
   });
 
   // Apply Physics
-  useCharacterPhysics(meshRef, walls, inputRef, position);
+  useCharacterPhysics(meshRef, walls, inputRef, position, otherPlayers);
 
   return (
     <group ref={meshRef}>
@@ -112,7 +123,7 @@ export const AIPlayer: React.FC<AIPlayerProps> = ({ walls, position, color, targ
             anchorX="center"
             anchorY="middle"
         >
-            {aiState}
+            {active ? aiState : 'PAUSED'}
         </Text>
     </group>
   );

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Group } from 'three';
+import { Group, Mesh } from 'three';
 import { ThreeElements } from '@react-three/fiber';
 import { WallConfig } from './LevelData';
 import useKeyboard from '../hooks/useKeyboard';
@@ -18,9 +18,10 @@ interface HumanPlayerProps {
   color: string;
   // We expose the mesh ref so the AI can track this player
   forwardRef?: React.RefObject<Group | null>;
+  otherPlayers?: React.RefObject<Group | Mesh | null>[];
 }
 
-export const HumanPlayer: React.FC<HumanPlayerProps> = ({ walls, position, color, forwardRef }) => {
+export const HumanPlayer: React.FC<HumanPlayerProps> = ({ walls, position, color, forwardRef, otherPlayers = [] }) => {
   // Use the passed ref or create a new one if not provided
   const internalRef = useRef<Group>(null);
   const meshRef = forwardRef || internalRef;
@@ -44,7 +45,7 @@ export const HumanPlayer: React.FC<HumanPlayerProps> = ({ walls, position, color
   }, [moveForward, moveBackward, moveLeft, moveRight, sprint]);
 
   // Apply Physics
-  useCharacterPhysics(meshRef, walls, inputRef, position);
+  useCharacterPhysics(meshRef, walls, inputRef, position, otherPlayers);
 
   return (
     <group ref={meshRef}>

@@ -17,7 +17,8 @@ export const useCharacterPhysics = (
   meshRef: React.RefObject<Group | Mesh | null>,
   walls: WallConfig[],
   inputRef: React.MutableRefObject<MoveInput>,
-  initialPosition: [number, number, number]
+  initialPosition: [number, number, number],
+  dynamicObstacles: React.RefObject<Group | Mesh | null>[] = []
 ) => {
   // Initialize reusable objects for GC performance
   const playerBox = useRef(new Box3()).current;
@@ -57,39 +58,42 @@ export const useCharacterPhysics = (
     }
 
     const currentPos = meshRef.current.position;
+    
+    // Helper to check collision with both static walls and dynamic obstacles
+    const checkCollision = (tempPos: Vector3) => {
+        playerBox.setFromCenterAndSize(tempPos, new Vector3(PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE));
+        
+        // 1. Static Walls
+        for (const wall of walls) {
+            wallBox.setFromCenterAndSize(new Vector3(...wall.position), new Vector3(...wall.size));
+            if (playerBox.intersectsBox(wallBox)) return true;
+        }
+        
+        // 2. Dynamic Obstacles (Other Players)
+        for (const obstacle of dynamicObstacles) {
+            if (obstacle.current && obstacle.current !== meshRef.current) {
+                wallBox.setFromCenterAndSize(obstacle.current.position, new Vector3(PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE));
+                 if (playerBox.intersectsBox(wallBox)) return true;
+            }
+        }
+        
+        return false;
+    };
 
     // X Axis Collision (Slide Logic)
     if (dx !== 0) {
       tempVector.set(currentPos.x + dx, currentPos.y, currentPos.z);
-      playerBox.setFromCenterAndSize(tempVector, new Vector3(PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE));
-      
-      let collisionX = false;
-      for (const wall of walls) {
-        wallBox.setFromCenterAndSize(new Vector3(...wall.position), new Vector3(...wall.size));
-        if (playerBox.intersectsBox(wallBox)) {
-          collisionX = true;
-          break;
-        }
+      if (!checkCollision(tempVector)) {
+          meshRef.current.position.x += dx;
       }
-      
-      if (!collisionX) meshRef.current.position.x += dx;
     }
 
     // Z Axis Collision (Slide Logic)
     if (dz !== 0) {
       tempVector.set(meshRef.current.position.x, currentPos.y, currentPos.z + dz);
-      playerBox.setFromCenterAndSize(tempVector, new Vector3(PLAYER_SIZE, PLAYER_SIZE, PLAYER_SIZE));
-      
-      let collisionZ = false;
-      for (const wall of walls) {
-        wallBox.setFromCenterAndSize(new Vector3(...wall.position), new Vector3(...wall.size));
-        if (playerBox.intersectsBox(wallBox)) {
-          collisionZ = true;
-          break;
-        }
+      if (!checkCollision(tempVector)) {
+          meshRef.current.position.z += dz;
       }
-      
-      if (!collisionZ) meshRef.current.position.z += dz;
     }
 
     // Movement Animation (Bobbing)
