@@ -1,0 +1,5 @@
+{
+  "name": "React Three Fiber Playground",
+  "description": "A 3D interactive scene where you can control a cube using your keyboard (WASD or Arrow Keys). Built with React Three Fiber and Tailwind CSS.",
+  "requestFramePermissions": []
+}
