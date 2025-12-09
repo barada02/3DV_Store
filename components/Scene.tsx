@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Mesh } from 'three';
+import { Group } from 'three';
 import { MeshReflectorMaterial, Edges } from '@react-three/drei';
 import { HumanPlayer } from './HumanPlayer';
 import { AIPlayer } from './AIPlayer';
@@ -7,7 +7,7 @@ import { walls } from './LevelData';
 
 export const Scene: React.FC = () => {
   // We need a reference to the human player to pass to the AI
-  const humanPlayerRef = useRef<Mesh>(null);
+  const humanPlayerRef = useRef<Group>(null);
 
   return (
     <>

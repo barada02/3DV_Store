@@ -1,21 +1,21 @@
 import React, { useRef, useEffect } from 'react';
-import { Mesh } from 'three';
-import { RoundedBox } from '@react-three/drei';
+import { Group } from 'three';
 import { WallConfig } from './LevelData';
 import useKeyboard from '../hooks/useKeyboard';
 import { useCharacterPhysics, MoveInput } from '../hooks/useCharacterPhysics';
+import { CharacterModel } from './CharacterModel';
 
 interface HumanPlayerProps {
   walls: WallConfig[];
   position: [number, number, number];
   color: string;
   // We expose the mesh ref so the AI can track this player
-  forwardRef?: React.RefObject<Mesh | null>;
+  forwardRef?: React.RefObject<Group | null>;
 }
 
 export const HumanPlayer: React.FC<HumanPlayerProps> = ({ walls, position, color, forwardRef }) => {
   // Use the passed ref or create a new one if not provided
-  const internalRef = useRef<Mesh>(null);
+  const internalRef = useRef<Group>(null);
   const meshRef = forwardRef || internalRef;
   
   // Input Handling
@@ -40,21 +40,10 @@ export const HumanPlayer: React.FC<HumanPlayerProps> = ({ walls, position, color
   useCharacterPhysics(meshRef, walls, inputRef, position);
 
   return (
-    <RoundedBox 
-      args={[1, 1, 1]} 
-      radius={0.15} 
-      smoothness={4} 
-      ref={meshRef} 
-      castShadow 
-      receiveShadow
-    >
-      <meshStandardMaterial 
-        color={color} 
-        emissive={color}
-        emissiveIntensity={sprint ? 0.8 : 0.4}
-        roughness={0.2}
-        metalness={0.8}
-      />
-    </RoundedBox>
+    <group ref={meshRef}>
+        <CharacterModel color={color} inputRef={inputRef} />
+        {/* Simple shadow/highlight to make it pop */}
+        <pointLight position={[0, 2, 0]} intensity={2} distance={5} color={color} />
+    </group>
   );
 };

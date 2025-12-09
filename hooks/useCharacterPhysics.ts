@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Vector3, Mesh, Box3 } from 'three';
+import { Vector3, Mesh, Box3, Group } from 'three';
 import { WallConfig } from '../components/LevelData';
 
 const SPEED = 8;
@@ -14,7 +14,7 @@ export interface MoveInput {
 }
 
 export const useCharacterPhysics = (
-  meshRef: React.RefObject<Mesh | null>,
+  meshRef: React.RefObject<Group | Mesh | null>,
   walls: WallConfig[],
   inputRef: React.MutableRefObject<MoveInput>,
   initialPosition: [number, number, number]

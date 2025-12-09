@@ -1,21 +1,22 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Mesh, Vector3 } from 'three';
-import { RoundedBox, Text } from '@react-three/drei';
+import { Mesh, Vector3, Group } from 'three';
+import { Text } from '@react-three/drei';
 import { WallConfig } from './LevelData';
 import { useCharacterPhysics, MoveInput } from '../hooks/useCharacterPhysics';
+import { CharacterModel } from './CharacterModel';
 
 interface AIPlayerProps {
   walls: WallConfig[];
   position: [number, number, number];
   color: string;
-  targetRef: React.RefObject<Mesh | null>;
+  targetRef: React.RefObject<Group | Mesh | null>;
 }
 
 type AIState = 'CHASE' | 'UNSTICK';
 
 export const AIPlayer: React.FC<AIPlayerProps> = ({ walls, position, color, targetRef }) => {
-  const meshRef = useRef<Mesh>(null);
+  const meshRef = useRef<Group>(null);
   const inputRef = useRef<MoveInput>({ x: 0, z: 0, sprint: false });
   
   // State Machine logic vars
@@ -94,35 +95,19 @@ export const AIPlayer: React.FC<AIPlayerProps> = ({ walls, position, color, targ
   useCharacterPhysics(meshRef, walls, inputRef, position);
 
   return (
-    <group>
-        <RoundedBox 
-        args={[1, 1, 1]} 
-        radius={0.15} 
-        smoothness={4} 
-        ref={meshRef} 
-        castShadow 
-        receiveShadow
-        >
-        <meshStandardMaterial 
-            color={color} 
-            emissive={color}
-            emissiveIntensity={aiState === 'UNSTICK' ? 1 : 0.2}
-            roughness={0.2}
-            metalness={0.8}
-        />
-        </RoundedBox>
+    <group ref={meshRef}>
+        <CharacterModel color={color} inputRef={inputRef} />
+        
         {/* State Label */}
-        {meshRef.current && (
-            <Text
-                position={[meshRef.current.position.x, meshRef.current.position.y + 1.2, meshRef.current.position.z]}
-                fontSize={0.3}
-                color="white"
-                anchorX="center"
-                anchorY="middle"
-            >
-                {aiState}
-            </Text>
-        )}
+        <Text
+            position={[0, 2, 0]}
+            fontSize={0.3}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+        >
+            {aiState}
+        </Text>
     </group>
   );
 };
