@@ -1,4 +1,5 @@
 
+
 # AI Agent Implementation Plan
 
 ## 1. Overview
@@ -134,3 +135,51 @@ This logic will be added to `useCharacterPhysics.ts`.
 2.  Calculate angle.
 3.  Apply rotation to `meshRef.current.rotation.y`.
 4.  Remove the old "tilt" logic (`rotation.z = -dx * 0.1`) as it conflicts with proper facing.
+
+## 9. Store Transformation & Scale Fix (New)
+
+We will transform the environment from a "Testing Arena" to a "Retail Store".
+
+### A. Layout ASCII Diagram
+We will implement a classic retail layout with two distinct sections.
+
+```text
+    +-------------------------------------------------------+
+    |                      BACK WALL                        |
+    |  +-----------+                       +-------------+  |
+    |  | Change Rm |      [STORAGE]        |  Stock Rm   |  |
+    |  +-----------+                       +-------------+  |
+    |                                                       |
+    |   [ TECH ZONE ]                     [ FASHION ZONE ]  |
+    |    (Blue/Grey)                        (Pink/Gold)     |
+    |                                                       |
+    |   +--Table--+      +---------+       +--Rack---+      |
+    |   | Laptops |      | Checkout|       | Clothes |      |
+    |   +---------+      | Counter |       +---------+      |
+    |                    +---------+                        |
+    |                                                       |
+    |                      ENTRANCE                         |
+    +-------------------------------------------------------+
+```
+
+### B. Scale Strategy (The "Ant" Fix)
+Currently, walls are 5 units high while players are effectively ~1.4 units high. This creates a "Warehouse" feel.
+To fix this, we will adjust the ratios to feel like a boutique:
+
+1.  **Player Size**: Increase `CharacterModel` scale from `0.4` to `0.6`. This makes the player ~2.2 units tall (approx 1.8m relative).
+2.  **Wall Height**: Decrease Outer Walls from `5` to `4` units.
+3.  **Wall Thickness**: Decrease from `2` units to `0.5` units (Drywall thickness vs Castle walls).
+4.  **Furniture Height**: Tables/Racks should be `1` to `1.2` units high (Waist height).
+
+### C. Technical Implementation
+We will update `LevelData.ts` to separate "Structure" from "Props".
+
+1.  **Walls**: The outer bounding box and internal dividers.
+2.  **Props**: Low-height obstacles (Tables, Racks). These act as obstacles but allow the camera to see over them.
+3.  **Zones**:
+    *   **Tech Zone**: Cool colors, sharp geometric tables.
+    *   **Fashion Zone**: Warm colors, thinner "rack" like obstacles.
+
+### D. Visuals
+*   **Floor**: Change to a Tiled or Wood texture look (using grid or colors).
+*   **Lighting**: Warmer, more inviting lighting rather than the harsh "Arena" light.

@@ -1,16 +1,9 @@
 import React, { useRef } from 'react';
 import { Group } from 'three';
 import { MeshReflectorMaterial, Edges } from '@react-three/drei';
-import { ThreeElements } from '@react-three/fiber';
 import { HumanPlayer } from './HumanPlayer';
 import { AIPlayer } from './AIPlayer';
 import { walls } from './LevelData';
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements extends ThreeElements {}
-  }
-}
 
 interface SceneProps {
   aiActive: boolean;

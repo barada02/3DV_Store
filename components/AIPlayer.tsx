@@ -1,16 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { useFrame, ThreeElements } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { Mesh, Vector3, Group } from 'three';
 import { Text } from '@react-three/drei';
 import { WallConfig } from './LevelData';
 import { useCharacterPhysics, MoveInput } from '../hooks/useCharacterPhysics';
 import { CharacterModel } from './CharacterModel';
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements extends ThreeElements {}
-  }
-}
 
 interface AIPlayerProps {
   walls: WallConfig[];
